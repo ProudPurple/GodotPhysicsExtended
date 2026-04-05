@@ -22,7 +22,7 @@ jobs:
             RESPONSE=$(curl -s -H "Authorization: token $TOKEN" \
               "https://api.github.com/repos/ProudPurple/$REPO/traffic/clones")
             
-            echo "$DATE,$REPO,$RESPONSE" >> stats/clone_log.csv
+            echo "$DATE,$REPO,\"$RESPONSE\"" >> stats/clone_log.csv
           done
       
       - name: Commit stats
