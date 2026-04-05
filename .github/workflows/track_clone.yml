@@ -1,7 +1,8 @@
 name: Track Clone Stats
+
 on:
   schedule:
-    - cron: '0 0 * * *'  # runs daily at midnight UTC
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 jobs:
@@ -11,26 +12,39 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.STATS_TOKEN }}
-      
+
       - name: Fetch and log clone stats
         env:
           TOKEN: ${{ secrets.STATS_TOKEN }}
         run: |
+          mkdir -p stats
+
+          FILE=stats/clone_log.csv
+
+          # Create file with header if it doesn't exist
+          if [ ! -f "$FILE" ]; then
+            echo "date,repo,total_clones,unique_cloners,daily_new_clones" > "$FILE"
+          fi
+
           DATE=$(date -u +"%Y-%m-%d")
-          
+
           for REPO in SpringBody2D; do
             RESPONSE=$(curl -s -H "Authorization: token $TOKEN" \
               "https://api.github.com/repos/ProudPurple/$REPO/traffic/clones")
-            
+
             COUNT=$(echo "$RESPONSE" | jq '.count')
             UNIQUES=$(echo "$RESPONSE" | jq '.uniques')
 
-            echo "$DATE,$REPO,$COUNT,$UNIQUES" >> stats/clone_log.csv
-                    done
-      - name: Commit stats
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add stats/clone_log.csv
-          git commit -m "Daily stats update $(date -u +"%Y-%m-%d")" || exit 0
-          git push
+            # Get previous total_clones from last row
+            PREV=$(tail -n 1 "$FILE" | cut -d',' -f3)
+
+            # Default to 0 if header or invalid
+            if ! [[ "$PREV" =~ ^[0-9]+$ ]]; then
+              PREV=0
+            fi
+
+            # Compute daily new clones
+            DAILY_NEW=$(( COUNT - PREV ))
+            if [ "$DAILY_NEW" -lt 0 ]; then
+              DAILY_NEW=0
+            fi
