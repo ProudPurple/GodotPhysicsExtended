@@ -22,9 +22,11 @@ jobs:
             RESPONSE=$(curl -s -H "Authorization: token $TOKEN" \
               "https://api.github.com/repos/ProudPurple/$REPO/traffic/clones")
             
-            echo "$DATE,$REPO,\"$RESPONSE\"" >> stats/clone_log.csv
-          done
-      
+            COUNT=$(echo "$RESPONSE" | jq '.count')
+            UNIQUES=$(echo "$RESPONSE" | jq '.uniques')
+
+            echo "$DATE,$REPO,$COUNT,$UNIQUES" >> stats/clone_log.csv
+                    done
       - name: Commit stats
         run: |
           git config user.name "github-actions"
