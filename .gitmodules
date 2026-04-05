@@ -1,0 +1,3 @@
+[submodule "SpringBody2D"]
+	path = SpringBody2D
+	url = https://github.com/ProudPurple/SpringBody2D
