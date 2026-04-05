@@ -1,0 +1,34 @@
+name: Track Clone Stats
+on:
+  schedule:
+    - cron: '0 0 * * *'  # runs daily at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.STATS_TOKEN }}
+      
+      - name: Fetch and log clone stats
+        env:
+          TOKEN: ${{ secrets.STATS_TOKEN }}
+        run: |
+          DATE=$(date -u +"%Y-%m-%d")
+          
+          for REPO in SpringBody2D; do
+            RESPONSE=$(curl -s -H "Authorization: token $TOKEN" \
+              "https://api.github.com/repos/ProudPurple/$REPO/traffic/clones")
+            
+            echo "$DATE,$REPO,$RESPONSE" >> stats/clone_log.csv
+          done
+      
+      - name: Commit stats
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add stats/clone_log.csv
+          git commit -m "Daily stats update $(date -u +"%Y-%m-%d")" || exit 0
+          git push
