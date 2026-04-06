@@ -34,23 +34,7 @@ jobs:
             COUNT=$(echo "$RESPONSE" | jq '.count')
             UNIQUES=$(echo "$RESPONSE" | jq '.uniques')
 
-            # Get last DATA row (not header)
-            LAST_LINE=$(grep -v "^date," "$FILE" | tail -n 1)
-
-            PREV=$(echo "$LAST_LINE" | cut -d',' -f3)
-
-            # Default to 0 if empty or non-numeric
-            if ! [[ "$PREV" =~ ^[0-9]+$ ]]; then
-              PREV=0
-            fi
-
-            # Compute daily new clones
-            DAILY_NEW=$(( COUNT - PREV ))
-            if [ "$DAILY_NEW" -lt 0 ]; then
-              DAILY_NEW=0
-            fi
-
-            echo "$DATE,$REPO,$COUNT,$UNIQUES,$DAILY_NEW" >> "$FILE"
+            echo "$DATE,$REPO,$COUNT,$UNIQUES" >> "$FILE"
           done
       - name: Commit stats
         run: |
