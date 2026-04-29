@@ -2,7 +2,7 @@
 
 A modular collection of C++ GDExtension physics nodes for Godot 4, adding specialized physics behaviors missing from Godot's built-in node set.
 
-<!-- ![Image](https://github.com/user-attachments/assets/012780b7-403e-4426-b8b7-e1792f3fcb8d) -->
+![Image](https://github.com/user-attachments/assets/012780b7-403e-4426-b8b7-e1792f3fcb8d)
 
 ---
 
